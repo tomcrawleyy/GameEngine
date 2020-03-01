@@ -13,6 +13,7 @@ namespace V1._0.Engine
 
         public void Prepare()
         {
+            GL.Clear(ClearBufferMask.ColorBufferBit);
             GL.ClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         }
 
@@ -20,6 +21,7 @@ namespace V1._0.Engine
         {
             GL.BindVertexArray(model.VertexArrayObject);
             GL.EnableVertexAttribArray(0);
+            //GL.DrawElements(PrimitiveType.Triangles, model.VertexCount, DrawElementsType.UnsignedInt, 0);
             GL.DrawArrays(PrimitiveType.Triangles, 0, model.VertexCount);
             GL.DisableVertexAttribArray(0);
             GL.BindVertexArray(0);

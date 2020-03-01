@@ -12,17 +12,18 @@ namespace V1._0.Engine
     {
         private List<Int32> VertexArrayObjects = new List<Int32>();
         private List<Int32> VertexBufferObjects = new List<Int32>();
-        public RawModel LoadToVAO(float[] positions)
+        public RawModel LoadToVAO(float[] positions, int[] indices)
         {
-            int vertexArrayObject = CreateVertexArrayObject();
+            var vertexArrayObject = CreateVertexArrayObject();
+            BindIndicesBuffer(indices);
             StoreDataInAttributeList(0, positions);
             UnbindVAO();
-            return new RawModel(vertexArrayObject, positions.Length / 3);
+            return new RawModel(vertexArrayObject, indices.Length);
         }
 
         private int CreateVertexArrayObject()
         {
-            int vertexArrayObject = GL.GenVertexArray();
+            var vertexArrayObject = GL.GenVertexArray();
             VertexArrayObjects.Add(vertexArrayObject);
             GL.BindVertexArray(vertexArrayObject);
             return vertexArrayObject;
@@ -30,12 +31,20 @@ namespace V1._0.Engine
 
         private void StoreDataInAttributeList(int attributeNumber, float[] data)
         {
-            int vertexBufferObject = GL.GenBuffer();
+            var vertexBufferObject = GL.GenBuffer();
             VertexBufferObjects.Add(vertexBufferObject);
             GL.BindBuffer(BufferTarget.ArrayBuffer, vertexBufferObject);
             GL.BufferData(BufferTarget.ArrayBuffer, data.Length * sizeof(float), data, BufferUsageHint.StaticDraw);
             GL.VertexAttribPointer(attributeNumber, 3, VertexAttribPointerType.Float, false, 0, 0);
             GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
+        }
+        
+        private void BindIndicesBuffer(int[] indices)
+        {
+            var vertexBufferObject = GL.GenBuffer();
+            VertexBufferObjects.Add(vertexBufferObject);
+            GL.BindBuffer(BufferTarget.ArrayBuffer, vertexBufferObject);
+            GL.BufferData(BufferTarget.ArrayBuffer, indices.Length * sizeof(int), indices, BufferUsageHint.StaticDraw);
         }
 
         private void CleanUp()
