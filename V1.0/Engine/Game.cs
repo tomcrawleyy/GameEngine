@@ -14,12 +14,20 @@ namespace V1._0
     public class Game : GameWindow
     {
         readonly float[] _vertices = {
-            -0.5f, -0.5f, 0.0f, //Bottom-left vertex
-            0.5f, -0.5f, 0.0f, //Bottom-right vertex
-            0.0f,  0.5f, 0.0f  //Top vertex
+             0.5f,  0.5f, 0.0f, // top right
+             0.5f, -0.5f, 0.0f, // bottom right
+            -0.5f, -0.5f, 0.0f, // bottom left
+            -0.5f,  0.5f, 0.0f, // top left
+        };
+
+        readonly uint[] indices =
+        {
+            0, 1, 3, // first triangle
+            1, 2, 3  // second triangle
         };
         int _vertexBufferObject;
         int _vertexArrayObject;
+        int _elementBufferObject;
 
         Shader _shader;
 
@@ -43,22 +51,27 @@ namespace V1._0
         protected override void OnLoad(EventArgs e)
         {
             GL.ClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-            _shader = new Shader("..\\..\\Engine\\Shaders\\shader.vert", "..\\..\\Engine\\Shaders\\shader.frag");
-            //GL.GetInteger(GetPName.MajorVersion, out int major);
-            //GL.GetInteger(GetPName.MinorVersion, out int minor);
-            //Console.WriteLine("Major: " + major + " Minor: " + minor);
             _vertexBufferObject = GL.GenBuffer();
-            _vertexArrayObject = GL.GenVertexArray();
+            GL.BindBuffer(BufferTarget.ArrayBuffer, _vertexBufferObject);
+            GL.BufferData(BufferTarget.ArrayBuffer, _vertices.Length * sizeof(float), _vertices, BufferUsageHint.StaticDraw);
 
+            _elementBufferObject = GL.GenBuffer();
+            GL.BindBuffer(BufferTarget.ElementArrayBuffer, _elementBufferObject);
+            GL.BufferData(BufferTarget.ElementArrayBuffer, indices.Length * sizeof(uint), indices, BufferUsageHint.StaticDraw);
+
+            _shader = new Shader("..\\..\\Engine\\Shaders\\shader.vert", "..\\..\\Engine\\Shaders\\shader.frag");
+            _shader.Use();
+
+            _vertexArrayObject = GL.GenVertexArray();
             GL.BindVertexArray(_vertexArrayObject);
 
             GL.BindBuffer(BufferTarget.ArrayBuffer, _vertexBufferObject);
-            GL.BufferData(BufferTarget.ArrayBuffer, _vertices.Length * sizeof(float), _vertices, BufferUsageHint.StaticDraw);
+
+            GL.BindBuffer(BufferTarget.ElementArrayBuffer, _elementBufferObject);
 
             GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 3 * sizeof(float), 0);
             GL.EnableVertexAttribArray(0);
 
-            _shader.Use()
 ;
             base.OnLoad(e);
         }
@@ -67,7 +80,14 @@ namespace V1._0
         {
             _shader.Dispose();
             GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
+            GL.BindBuffer(BufferTarget.ElementArrayBuffer, 0);
+            GL.BindVertexArray(0);
+            GL.UseProgram(0);
+
             GL.DeleteBuffer(_vertexBufferObject);
+            GL.DeleteBuffer(_elementBufferObject);
+            GL.DeleteVertexArray(_vertexArrayObject);
+            GL.DeleteProgram(_shader.Handle);
             base.OnUnload(e);
         }
 
@@ -76,7 +96,7 @@ namespace V1._0
             GL.Clear(ClearBufferMask.ColorBufferBit);
             _shader.Use();
             GL.BindVertexArray(_vertexArrayObject);
-            GL.DrawArrays(PrimitiveType.Triangles, 0, 3);
+            GL.DrawElements(PrimitiveType.Triangles, indices.Length, DrawElementsType.UnsignedInt, new IntPtr(0));
             Context.SwapBuffers();
             base.OnRenderFrame(e);
         }

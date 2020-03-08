@@ -10,7 +10,7 @@ namespace V1._0.Engine.Shaders
 {
     public class Shader
     {
-        int Handle;
+        public int Handle;
 
         public Shader(string vertexPath, string fragmentPath)
         {
