@@ -56,13 +56,13 @@
   <ItemGroup>
     <Compile Include="Engine\Game.cs" />
     <Compile Include="EngineTester\Program.cs" />
-    <Compile Include="Engine\Loader.cs" />
-    <Compile Include="Engine\RawModel.cs" />
-    <Compile Include="Engine\Renderer.cs" />
+    <Compile Include="Engine\Shaders\Shader.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="Engine\Shaders\shader.frag" />
+    <None Include="Engine\Shaders\shader.vert" />
     <None Include="OpenTK.dll.config" />
     <None Include="packages.config" />
   </ItemGroup>

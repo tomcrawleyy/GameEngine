@@ -7,26 +7,23 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using V1._0.Engine;
+using V1._0.Engine.Shaders;
 
 namespace V1._0
 {
     public class Game : GameWindow
     {
-        private Renderer _renderer;
-        private Loader _loader;
-        private RawModel _model;
-        private float[] _vertices = {
-            // Left Bottom Triangle
-            -0.5f, 0.5f, 0f,
-            -0.5f, -0.5f, 0f,
-            0.5f, -0.5f, 0f,
-            //Right Top Triangle
-            0.5f, -0.5f, 0f,
-            0.5f, 0.5f, 0f,
-            -0.5f, 0.5f, 0f
+        readonly float[] _vertices = {
+            -0.5f, -0.5f, 0.0f, //Bottom-left vertex
+            0.5f, -0.5f, 0.0f, //Bottom-right vertex
+            0.0f,  0.5f, 0.0f  //Top vertex
         };
-    public Game(int width, int height, string title) : base(width, height, GraphicsMode.Default, title)
+        int _vertexBufferObject;
+        int _vertexArrayObject;
+
+        Shader _shader;
+
+        public Game(int width, int height, string title) : base(width, height, GraphicsMode.Default, title)
         {
 
         }
@@ -46,27 +43,40 @@ namespace V1._0
         protected override void OnLoad(EventArgs e)
         {
             GL.ClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+            _shader = new Shader("..\\..\\Engine\\Shaders\\shader.vert", "..\\..\\Engine\\Shaders\\shader.frag");
+            //GL.GetInteger(GetPName.MajorVersion, out int major);
+            //GL.GetInteger(GetPName.MinorVersion, out int minor);
+            //Console.WriteLine("Major: " + major + " Minor: " + minor);
+            _vertexBufferObject = GL.GenBuffer();
+            _vertexArrayObject = GL.GenVertexArray();
 
-            //Code goes here.
-            _renderer = new Renderer();
-            _loader = new Loader();
-            _model = _loader.LoadToVAO(_vertices);
+            GL.BindVertexArray(_vertexArrayObject);
 
+            GL.BindBuffer(BufferTarget.ArrayBuffer, _vertexBufferObject);
+            GL.BufferData(BufferTarget.ArrayBuffer, _vertices.Length * sizeof(float), _vertices, BufferUsageHint.StaticDraw);
+
+            GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 3 * sizeof(float), 0);
+            GL.EnableVertexAttribArray(0);
+
+            _shader.Use()
+;
             base.OnLoad(e);
         }
 
         protected override void OnUnload(EventArgs e)
         {
+            _shader.Dispose();
+            GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
+            GL.DeleteBuffer(_vertexBufferObject);
             base.OnUnload(e);
         }
 
         protected override void OnRenderFrame(FrameEventArgs e)
         {
             GL.Clear(ClearBufferMask.ColorBufferBit);
-
-            //Code goes here.
-            _renderer.Prepare();
-            _renderer.Render(_model);
+            _shader.Use();
+            GL.BindVertexArray(_vertexArrayObject);
+            GL.DrawArrays(PrimitiveType.Triangles, 0, 3);
             Context.SwapBuffers();
             base.OnRenderFrame(e);
         }
